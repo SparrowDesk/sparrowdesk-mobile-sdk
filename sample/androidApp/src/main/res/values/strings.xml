@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SparrowDesk Sample</string>
+    <string name="hint_domain">Domain (e.g. yourcompany.sparrowdesk.com)</string>
+    <string name="hint_token">Widget Token</string>
+    <string name="hint_email">User Email (optional)</string>
+    <string name="hint_name">User Name (optional)</string>
+    <string name="hint_tags">Tags (comma-separated, optional)</string>
+    <string name="btn_load">Load Widget</string>
+    <string name="btn_open">Open Widget</string>
+    <string name="btn_close">Close Widget</string>
+    <string name="btn_hide">Hide Widget</string>
+    <string name="btn_show">Show WebView</string>
+    <string name="btn_hide_webview">Hide WebView</string>
+    <string name="btn_status">Get Status</string>
+    <string name="btn_destroy">Destroy</string>
+    <string name="label_status">Status: --</string>
+    <string name="label_events">Events will appear here</string>
+</resources>

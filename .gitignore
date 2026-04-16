@@ -1,0 +1,58 @@
+# ── Gradle ────────────────────────────────────────────
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+gradle-app.setting
+!gradlew
+!gradlew.bat
+
+# ── Android ───────────────────────────────────────────
+local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+captures/
+.externalNativeBuild/
+.cxx/
+
+# ── Kotlin/Native ─────────────────────────────────────
+.konan/
+.kotlin/
+
+# ── Xcode / iOS ──────────────────────────────────────
+*.xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+Pods/
+
+# ── IDE ───────────────────────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+*~
+
+# ── macOS ─────────────────────────────────────────────
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# ── Secrets / env ─────────────────────────────────────
+*.env
+*.env.local
+*.keystore
+*.jks
+
+# ── Maven local publish artifacts (testing) ───────────
+.m2/
