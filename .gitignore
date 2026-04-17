@@ -22,7 +22,8 @@ captures/
 .kotlin/
 
 # ── Xcode / iOS ──────────────────────────────────────
-*.xcuserdata/
+xcuserdata/
+*.xcuserstate
 *.xcworkspace/xcuserdata/
 *.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
 DerivedData/
