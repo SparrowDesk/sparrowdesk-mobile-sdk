@@ -46,13 +46,13 @@ dependencies {
    ```
    https://github.com/SparrowDesk/sparrowdesk-mobile-sdk
    ```
-3. Select version **0.1.0** or later
+3. Select version **0.1.1** or later
 
 **In `Package.swift`:**
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/SparrowDesk/sparrowdesk-mobile-sdk", from: "0.1.0")
+    .package(url: "https://github.com/SparrowDesk/sparrowdesk-mobile-sdk", from: "0.1.1")
 ]
 ```
 
