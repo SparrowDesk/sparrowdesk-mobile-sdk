@@ -55,5 +55,8 @@ Pods/
 *.keystore
 *.jks
 
+# ── Claude Code ──────────────────────────────────────
+.claude/
+
 # ── Maven local publish artifacts (testing) ───────────
 .m2/
