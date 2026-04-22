@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: write
-  packages: write
 
 jobs:
   publish:
@@ -32,19 +31,9 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      # ── Android: Publish to GitHub Packages ──
-      - name: Publish Android AAR
-        run: |
-          ./gradlew :sparrowdesk-sdk:publishAllPublicationsToGitHubPackagesRepository \
-            -PSDK_VERSION="${{ inputs.version }}" \
-            -PGITHUB_OWNER="${{ github.repository_owner }}" \
-            -PGITHUB_REPO="${{ github.event.repository.name }}" \
-            -Pgpr.user="${{ github.actor }}" \
-            -Pgpr.token="${{ secrets.GITHUB_TOKEN }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       # ── iOS: Build XCFramework ──
+      # Android distribution is served by JitPack directly from the git tag
+      # (see jitpack.yml) — no publish step required in CI.
       - name: Build XCFramework
         run: ./gradlew :sparrowdesk-sdk:assembleSparrowDeskSDKXCFramework
 
@@ -61,9 +50,41 @@ jobs:
       # ── Create GitHub Release with XCFramework ──
       - name: Create GitHub Release
         run: |
+          NOTES=$(cat <<EOF
+          ## SparrowDesk SDK v${{ inputs.version }}
+
+          ### Android (JitPack)
+
+          Add the JitPack repository to \`settings.gradle.kts\`:
+
+          \`\`\`kotlin
+          dependencyResolutionManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  maven { url = uri("https://jitpack.io") }
+              }
+          }
+          \`\`\`
+
+          Then add the dependency in \`build.gradle.kts\`:
+
+          \`\`\`kotlin
+          implementation("com.github.SparrowDesk.sparrowdesk-mobile-sdk:sparrowdesk-sdk:${{ inputs.version }}")
+          \`\`\`
+
+          ### iOS (Swift Package Manager)
+
+          Add this repo URL in Xcode, or add to \`Package.swift\`:
+
+          \`\`\`swift
+          .package(url: "https://github.com/SparrowDesk/sparrowdesk-mobile-sdk", from: "${{ inputs.version }}")
+          \`\`\`
+          EOF
+          )
           gh release create "v${{ inputs.version }}" \
             --title "v${{ inputs.version }}" \
-            --generate-notes \
+            --notes "$NOTES" \
             sparrowdesk-sdk/build/outputs/SparrowDeskSDK.xcframework.zip
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

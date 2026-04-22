@@ -13,24 +13,16 @@ The SDK loads the widget inside a native WebView and provides a Kotlin/Swift API
 
 ## Installation
 
-### Android (GitHub Packages)
+### Android (JitPack)
 
-1. Add the GitHub Packages repository to your **`settings.gradle.kts`**:
+1. Add the JitPack repository to your **`settings.gradle.kts`**:
 
 ```kotlin
 dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url = uri("https://maven.pkg.github.com/SparrowDesk/sparrowdesk-mobile-sdk")
-            credentials {
-                username = providers.gradleProperty("gpr.user").orNull
-                    ?: System.getenv("GITHUB_USERNAME")
-                password = providers.gradleProperty("gpr.token").orNull
-                    ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 ```
@@ -39,7 +31,7 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    implementation("com.sparrowdesk:sparrowdesk-sdk-android:0.1.0")
+    implementation("com.github.SparrowDesk.sparrowdesk-mobile-sdk:sparrowdesk-sdk:0.1.1")
 }
 ```
 
@@ -410,14 +402,20 @@ use it as a reference when wiring a fullscreen chat experience.
 
 Go to **Actions > Publish SDK > Run workflow** and enter the version (e.g. `0.2.0`). The workflow:
 
-1. Publishes the Android AAR to GitHub Packages
-2. Builds the XCFramework and uploads it to a GitHub Release
-3. Updates `Package.swift` with the new checksum and commits it
+1. Builds the XCFramework and uploads it to a GitHub Release (for Swift Package Manager)
+2. Updates `Package.swift` with the new checksum and commits it
+3. Tags the commit — JitPack builds the Android AAR on-demand from the tag
+
+> **Android distribution:** The Android AAR is served by [JitPack](https://jitpack.io)
+> directly from git tags. No publish step is required — the first time a
+> consumer requests `com.github.SparrowDesk.sparrowdesk-mobile-sdk:sparrowdesk-sdk:<tag>`,
+> JitPack clones the tag, runs the build defined in `jitpack.yml`, and caches
+> the result.
 
 ### Manual
 
 ```bash
-export GITHUB_TOKEN="ghp_..."
+export GITHUB_TOKEN="ghp_..."   # needs `contents: write` scope for the GitHub Release
 ./scripts/publish.sh 0.2.0
 ```
 

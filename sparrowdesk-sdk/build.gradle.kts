@@ -4,9 +4,7 @@ plugins {
     `maven-publish`
 }
 
-val sdkVersion: String = project.findProperty("SDK_VERSION") as? String ?: "0.1.0"
-val githubOwner: String = project.findProperty("GITHUB_OWNER") as? String ?: "SparrowDesk"
-val githubRepo: String = project.findProperty("GITHUB_REPO") as? String ?: "sparrowdesk-mobile-sdk"
+val sdkVersion: String = project.findProperty("SDK_VERSION") as? String ?: "0.1.1"
 
 kotlin {
     // Suppress expect/actual classes beta warning
@@ -74,24 +72,15 @@ android {
 }
 
 // ── Publishing ──────────────────────────────────────────────
+//
+// Android distribution is served by JitPack (https://jitpack.io), which
+// clones the git tag and runs `publishToMavenLocal` (see jitpack.yml) to
+// generate the artifacts on demand. No remote repository needs to be
+// configured here — the KMP + maven-publish plugins produce the publications
+// JitPack consumes.
 
 group = "com.sparrowdesk"
 version = sdkVersion
-
-publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/$githubOwner/$githubRepo")
-            credentials {
-                username = project.findProperty("gpr.user") as? String
-                    ?: System.getenv("GITHUB_ACTOR")
-                password = project.findProperty("gpr.token") as? String
-                    ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
-    }
-}
 
 // ── XCFramework zip for SPM ─────────────────────────────────
 
