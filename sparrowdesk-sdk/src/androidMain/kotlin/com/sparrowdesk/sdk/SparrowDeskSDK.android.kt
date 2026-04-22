@@ -6,8 +6,11 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 
@@ -30,7 +33,11 @@ actual class SparrowDeskSDK actual constructor(private val config: SparrowDeskCo
      */
     @SuppressLint("SetJavaScriptEnabled")
     fun attach(context: Context, parent: ViewGroup) {
-        if (webView != null) return // Already attached
+        if (webView != null) {
+            logd("attach: already attached, ignoring")
+            return
+        }
+        logd("attach: domain=${config.domain}")
 
         val wv = WebView(context).apply {
             layoutParams = ViewGroup.LayoutParams(
@@ -42,8 +49,30 @@ actual class SparrowDeskSDK actual constructor(private val config: SparrowDeskCo
             settings.allowFileAccess = false
             settings.allowContentAccess = false
 
-            webViewClient = WebViewClient()
-            webChromeClient = WebChromeClient()
+            webViewClient = object : WebViewClient() {
+                override fun onReceivedError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    error: WebResourceError?
+                ) {
+                    super.onReceivedError(view, request, error)
+                    loge(
+                        "WebView onReceivedError: url=${request?.url} " +
+                            "code=${error?.errorCode} desc=${error?.description}"
+                    )
+                }
+            }
+            webChromeClient = object : WebChromeClient() {
+                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                    consoleMessage?.let {
+                        logd(
+                            "JS console [${it.messageLevel()}] " +
+                                "${it.sourceId()}:${it.lineNumber()} ${it.message()}"
+                        )
+                    }
+                    return true
+                }
+            }
 
             // Register the native bridge
             addJavascriptInterface(NativeBridgeInterface(), "NativeBridgeAndroid")
@@ -73,47 +102,59 @@ window.NativeBridge = {
             "UTF-8",
             null
         )
+        logd("attach: HTML loaded")
     }
 
     actual fun openWidget() {
+        logd("openWidget()")
         runOrQueue(JsBridge.openWidget())
     }
 
     actual fun closeWidget() {
+        logd("closeWidget()")
         runOrQueue(JsBridge.closeWidget())
     }
 
     actual fun hideWidget() {
+        logd("hideWidget()")
         runOrQueue(JsBridge.hideWidget())
     }
 
     actual fun onOpen(callback: SparrowDeskCallback) {
+        logd("onOpen: callback registered")
         onOpenCallback = callback
     }
 
     actual fun onClose(callback: SparrowDeskCallback) {
+        logd("onClose: callback registered")
         onCloseCallback = callback
     }
 
     actual fun setTags(tags: List<String>) {
+        logd("setTags: $tags")
         runOrQueue(JsBridge.setTags(tags))
     }
 
     actual fun setConversationFields(fields: Map<String, String>) {
+        logd("setConversationFields: keys=${fields.keys}")
         runOrQueue(JsBridge.setConversationFields(fields))
     }
 
     actual fun setContactFields(fields: Map<String, String>) {
+        logd("setContactFields: keys=${fields.keys}")
         runOrQueue(JsBridge.setContactFields(fields))
     }
 
     actual fun getStatus(callback: (WidgetStatus) -> Unit) {
+        logd("getStatus()")
         val wv = webView ?: run {
+            logw("getStatus: WebView not attached, returning UNKNOWN")
             callback(WidgetStatus.UNKNOWN)
             return
         }
         mainHandler.post {
             wv.evaluateJavascript(JsBridge.getStatus()) { result ->
+                logd("getStatus result=$result")
                 val status = WidgetStatus.fromString(
                     result?.removeSurrounding("\"") ?: ""
                 )
@@ -123,14 +164,17 @@ window.NativeBridge = {
     }
 
     actual fun show() {
+        logd("show()")
         mainHandler.post { webView?.visibility = View.VISIBLE }
     }
 
     actual fun hide() {
+        logd("hide()")
         mainHandler.post { webView?.visibility = View.GONE }
     }
 
     actual fun destroy() {
+        logd("destroy()")
         mainHandler.post {
             webView?.let { wv ->
                 (wv.parent as? ViewGroup)?.removeView(wv)
@@ -150,22 +194,40 @@ window.NativeBridge = {
 
     private fun runOrQueue(js: String) {
         if (isWidgetReady) {
+            logd("runOrQueue: executing (widget ready)")
             executeJs(js)
         } else {
             pendingCommands.add(js)
+            logd("runOrQueue: queued (pending=${pendingCommands.size})")
         }
     }
 
     private fun executeJs(js: String) {
-        val wv = webView ?: return
+        val wv = webView ?: run {
+            logw("executeJs: WebView is null, dropping command")
+            return
+        }
         mainHandler.post {
             wv.evaluateJavascript(js, null)
         }
     }
 
     private fun flushPendingCommands() {
+        logd("flushPendingCommands: count=${pendingCommands.size}")
         pendingCommands.forEach { executeJs(it) }
         pendingCommands.clear()
+    }
+
+    private fun logd(message: String) {
+        if (config.debug) SDKLogger.d(TAG, message)
+    }
+
+    private fun logw(message: String) {
+        if (config.debug) SDKLogger.w(TAG, message)
+    }
+
+    private fun loge(message: String) {
+        if (config.debug) SDKLogger.e(TAG, message)
     }
 
     /**
@@ -178,13 +240,25 @@ window.NativeBridge = {
             mainHandler.post {
                 when (message) {
                     "widgetReady" -> {
+                        logd("bridge: widgetReady")
                         isWidgetReady = true
                         flushPendingCommands()
                     }
-                    "onOpen" -> onOpenCallback?.onEvent()
-                    "onClose" -> onCloseCallback?.onEvent()
+                    "onOpen" -> {
+                        logd("bridge: onOpen")
+                        onOpenCallback?.onEvent()
+                    }
+                    "onClose" -> {
+                        logd("bridge: onClose")
+                        onCloseCallback?.onEvent()
+                    }
+                    else -> logw("bridge: unknown message '$message'")
                 }
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "SparrowDeskSDK"
     }
 }

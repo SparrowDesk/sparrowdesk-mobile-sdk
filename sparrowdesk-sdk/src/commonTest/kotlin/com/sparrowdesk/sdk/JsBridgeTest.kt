@@ -8,47 +8,47 @@ class JsBridgeTest {
 
     @Test
     fun openWidgetProducesCorrectJs() {
-        assertEquals("window.SparrowDesk.openWidget();", JsBridge.openWidget())
+        assertEquals("window.sparrowDesk.openWidget();", JsBridge.openWidget())
     }
 
     @Test
     fun closeWidgetProducesCorrectJs() {
-        assertEquals("window.SparrowDesk.closeWidget();", JsBridge.closeWidget())
+        assertEquals("window.sparrowDesk.closeWidget();", JsBridge.closeWidget())
     }
 
     @Test
     fun hideWidgetProducesCorrectJs() {
-        assertEquals("window.SparrowDesk.hideWidget();", JsBridge.hideWidget())
+        assertEquals("window.sparrowDesk.hideWidget();", JsBridge.hideWidget())
     }
 
     @Test
     fun getStatusProducesCorrectJs() {
-        assertEquals("window.SparrowDesk.status", JsBridge.getStatus())
+        assertEquals("window.sparrowDesk.status", JsBridge.getStatus())
     }
 
     @Test
     fun setTagsWithSingleTag() {
         val result = JsBridge.setTags(listOf("support"))
-        assertEquals("window.SparrowDesk.setTags([\"support\"]);", result)
+        assertEquals("window.sparrowDesk.setTags([\"support\"]);", result)
     }
 
     @Test
     fun setTagsWithMultipleTags() {
         val result = JsBridge.setTags(listOf("vip", "premium"))
-        assertEquals("window.SparrowDesk.setTags([\"vip\",\"premium\"]);", result)
+        assertEquals("window.sparrowDesk.setTags([\"vip\",\"premium\"]);", result)
     }
 
     @Test
     fun setTagsWithEmptyList() {
         val result = JsBridge.setTags(emptyList())
-        assertEquals("window.SparrowDesk.setTags([]);", result)
+        assertEquals("window.sparrowDesk.setTags([]);", result)
     }
 
     @Test
     fun setContactFieldsProducesCorrectJs() {
         val result = JsBridge.setContactFields(mapOf("email" to "test@example.com"))
         assertEquals(
-            "window.SparrowDesk.setContactFields({\"email\":\"test@example.com\"});",
+            "window.sparrowDesk.setContactFields({\"email\":\"test@example.com\"});",
             result
         )
     }
@@ -57,7 +57,7 @@ class JsBridgeTest {
     fun setConversationFieldsProducesCorrectJs() {
         val result = JsBridge.setConversationFields(mapOf("priority" to "high"))
         assertEquals(
-            "window.SparrowDesk.setConversationFields({\"priority\":\"high\"});",
+            "window.sparrowDesk.setConversationFields({\"priority\":\"high\"});",
             result
         )
     }

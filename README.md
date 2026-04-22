@@ -162,10 +162,15 @@ class ChatViewController: UIViewController {
 
 ```kotlin
 data class SparrowDeskConfig(
-    val domain: String,   // e.g. "yourcompany.sparrowdesk.com"
-    val token: String     // Your widget token from the SparrowDesk dashboard
+    val domain: String,              // e.g. "yourcompany.sparrowdesk.com"
+    val token: String,               // Your widget token from the SparrowDesk dashboard
+    val debug: Boolean = false       // When true, the SDK emits diagnostic logs
+                                     // (Android: logcat tag "SparrowDeskSDK"; iOS: Xcode console)
 )
 ```
+
+> Set `debug = true` during integration to trace the load / ready / open / close
+> lifecycle. Leave it `false` (default) in release builds — gated calls are no-ops.
 
 ### `SparrowDeskSDK`
 
@@ -261,6 +266,27 @@ override fun onDestroy() {
 }
 ```
 
+### Debug Logging
+
+Set `debug = true` on `SparrowDeskConfig` to emit diagnostic logs covering the
+load / ready / open / close lifecycle, native ↔ JS bridge traffic, WebView
+errors, and the pending-command queue.
+
+```kotlin
+val sdk = SparrowDeskSDK(SparrowDeskConfig(
+    domain = "yourcompany.sparrowdesk.com",
+    token  = "your-widget-token",
+    debug  = true
+))
+```
+
+- **Android:** `adb logcat -s SparrowDeskSDK:V` (logs use `android.util.Log`
+  under the tag `SparrowDeskSDK`).
+- **iOS:** logs are emitted via `print()` and appear in the Xcode console.
+
+Leave `debug` at its default (`false`) for release builds — all logging calls
+are gated and compile down to cheap no-ops.
+
 ## Architecture
 
 ```
@@ -282,8 +308,8 @@ override fun onDestroy() {
 │   window.SD_WIDGET_DOMAIN = "..."                │
 │   <script src="assets.cdn.sparrowdesk.com/...">  │
 │                                                  │
-│   window.SparrowDesk.openWidget()                │
-│   window.SparrowDesk.setContactFields({...})     │
+│   window.sparrowDesk.openWidget()                │
+│   window.sparrowDesk.setContactFields({...})     │
 └──────────────────┬──────────────────────────────┘
                    │  NativeBridge.postMessage()
                    ▼
@@ -371,6 +397,13 @@ adb install sample/androidApp/build/outputs/apk/debug/androidApp-debug.apk
 open sample/iosApp/SparrowDeskSample.xcodeproj
 ```
 
+The Android sample demonstrates both embedded (half-screen) and fullscreen
+presentation modes, per-session contact fields and tags, and every public
+control method (`openWidget`, `closeWidget`, `hideWidget`, `show`, `hide`,
+`getStatus`, `destroy`). In fullscreen mode the widget's own close icon or the
+system back button both route through `onClose` to restore the host layout —
+use it as a reference when wiring a fullscreen chat experience.
+
 ## Publishing
 
 ### Automated (GitHub Actions)
@@ -394,15 +427,15 @@ The SDK maps to the [SparrowDesk JavaScript API](https://developer.sparrowdesk.c
 
 | JS API | SDK Method |
 |--------|-----------|
-| `SparrowDesk.openWidget()` | `sdk.openWidget()` |
-| `SparrowDesk.closeWidget()` | `sdk.closeWidget()` |
-| `SparrowDesk.hideWidget()` | `sdk.hideWidget()` |
-| `SparrowDesk.onOpen(cb)` | `sdk.onOpen(callback)` |
-| `SparrowDesk.onClose(cb)` | `sdk.onClose(callback)` |
-| `SparrowDesk.setTags([...])` | `sdk.setTags(listOf(...))` |
-| `SparrowDesk.setContactFields({...})` | `sdk.setContactFields(mapOf(...))` |
-| `SparrowDesk.setConversationFields({...})` | `sdk.setConversationFields(mapOf(...))` |
-| `SparrowDesk.status` | `sdk.getStatus { status -> }` |
+| `sparrowDesk.openWidget()` | `sdk.openWidget()` |
+| `sparrowDesk.closeWidget()` | `sdk.closeWidget()` |
+| `sparrowDesk.hideWidget()` | `sdk.hideWidget()` |
+| `sparrowDesk.onOpen(cb)` | `sdk.onOpen(callback)` |
+| `sparrowDesk.onClose(cb)` | `sdk.onClose(callback)` |
+| `sparrowDesk.setTags([...])` | `sdk.setTags(listOf(...))` |
+| `sparrowDesk.setContactFields({...})` | `sdk.setContactFields(mapOf(...))` |
+| `sparrowDesk.setConversationFields({...})` | `sdk.setConversationFields(mapOf(...))` |
+| `sparrowDesk.status` | `sdk.getStatus { status -> }` |
 
 ## License
 

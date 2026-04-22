@@ -6,7 +6,8 @@
     <string name="hint_email">User Email (optional)</string>
     <string name="hint_name">User Name (optional)</string>
     <string name="hint_tags">Tags (comma-separated, optional)</string>
-    <string name="btn_load">Load Widget</string>
+    <string name="btn_load_half">Load (Half Screen)</string>
+    <string name="btn_load_full">Load (Full Screen)</string>
     <string name="btn_open">Open Widget</string>
     <string name="btn_close">Close Widget</string>
     <string name="btn_hide">Hide Widget</string>

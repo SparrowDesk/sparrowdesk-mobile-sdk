@@ -6,25 +6,27 @@ package com.sparrowdesk.sdk
  */
 internal object JsBridge {
 
-    fun openWidget(): String = "window.SparrowDesk.openWidget();"
+    private const val API = "window.sparrowDesk"
 
-    fun closeWidget(): String = "window.SparrowDesk.closeWidget();"
+    fun openWidget(): String = "$API.openWidget();"
 
-    fun hideWidget(): String = "window.SparrowDesk.hideWidget();"
+    fun closeWidget(): String = "$API.closeWidget();"
 
-    fun getStatus(): String = "window.SparrowDesk.status"
+    fun hideWidget(): String = "$API.hideWidget();"
+
+    fun getStatus(): String = "$API.status"
 
     fun setTags(tags: List<String>): String {
         val escaped = tags.joinToString(",") { "\"${escapeJs(it)}\"" }
-        return "window.SparrowDesk.setTags([$escaped]);"
+        return "$API.setTags([$escaped]);"
     }
 
     fun setConversationFields(fields: Map<String, String>): String {
-        return "window.SparrowDesk.setConversationFields(${mapToJsObject(fields)});"
+        return "$API.setConversationFields(${mapToJsObject(fields)});"
     }
 
     fun setContactFields(fields: Map<String, String>): String {
-        return "window.SparrowDesk.setContactFields(${mapToJsObject(fields)});"
+        return "$API.setContactFields(${mapToJsObject(fields)});"
     }
 
     private fun mapToJsObject(map: Map<String, String>): String {

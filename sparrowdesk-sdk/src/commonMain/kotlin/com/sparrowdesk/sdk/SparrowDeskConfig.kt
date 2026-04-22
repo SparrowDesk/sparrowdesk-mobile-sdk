@@ -5,8 +5,11 @@ package com.sparrowdesk.sdk
  *
  * @param domain Your SparrowDesk domain (e.g., "yourcompany.sparrowdesk.com")
  * @param token  Your widget token
+ * @param debug  When true, the SDK emits diagnostic logs (Android: logcat tag
+ *               "SparrowDeskSDK"; iOS: Xcode console). Leave false in release builds.
  */
 data class SparrowDeskConfig(
     val domain: String,
-    val token: String
+    val token: String,
+    val debug: Boolean = false
 )

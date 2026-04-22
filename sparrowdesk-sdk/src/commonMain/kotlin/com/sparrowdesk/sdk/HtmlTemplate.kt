@@ -9,6 +9,7 @@ internal object HtmlTemplate {
     fun build(config: SparrowDeskConfig): String {
         val escapedToken = JsBridge.escapeJs(config.token)
         val escapedDomain = JsBridge.escapeJs(config.domain)
+        val debug = if (config.debug) "true" else "false"
 
         return """
 <!DOCTYPE html>
@@ -24,6 +25,10 @@ internal object HtmlTemplate {
 <body>
 <script>
 (function() {
+    var DEBUG = $debug;
+    function log(msg) { if (DEBUG) console.log("[SD] " + msg); }
+    function warn(msg) { if (DEBUG) console.warn("[SD] " + msg); }
+
     // Inject the SparrowDesk widget
     window.SD_WIDGET_TOKEN = "$escapedToken";
     window.SD_WIDGET_DOMAIN = "$escapedDomain";
@@ -31,30 +36,57 @@ internal object HtmlTemplate {
     var script = document.createElement("script");
     script.src = "https://assets.cdn.sparrowdesk.com/chatbot/bundle/main.js";
     script.async = true;
+    script.onload = function() { log("bundle main.js onload"); };
+    script.onerror = function(e) { warn("bundle main.js failed to load"); };
     document.body.appendChild(script);
 
-    // Poll for SparrowDesk API readiness
+    function describe(obj) {
+        if (!obj) return String(obj);
+        var shape = {};
+        for (var k in obj) {
+            try { shape[k] = typeof obj[k]; } catch (e) { shape[k] = "?"; }
+        }
+        return JSON.stringify(shape);
+    }
+
+    var tries = 0;
     var readyCheck = setInterval(function() {
-        if (window.SparrowDesk) {
+        tries++;
+        var api = window.sparrowDesk || window.SparrowDesk;
+        // Wait for BOTH the API object AND the bundle's launcher-ready flag;
+        // the object can exist before internal init finishes, which caused
+        // the first-load openWidget() to be dropped.
+        if (api && window.SD_LAUNCHER_READY) {
             clearInterval(readyCheck);
+            log("sparrowDesk ready after " + tries + " tries; shape=" + describe(api));
 
-            // Wire up event listeners to native bridge
-            window.SparrowDesk.onOpen(function() {
-                if (window.NativeBridge) {
-                    window.NativeBridge.postMessage("onOpen");
-                }
-            });
-
-            window.SparrowDesk.onClose(function() {
-                if (window.NativeBridge) {
-                    window.NativeBridge.postMessage("onClose");
-                }
-            });
-
-            // Signal native side that widget is ready
-            if (window.NativeBridge) {
-                window.NativeBridge.postMessage("widgetReady");
+            if (typeof api.onOpen === "function") {
+                api.onOpen(function() {
+                    if (window.NativeBridge) window.NativeBridge.postMessage("onOpen");
+                });
+            } else {
+                warn("sparrowDesk.onOpen is not a function");
             }
+            if (typeof api.onClose === "function") {
+                api.onClose(function() {
+                    if (window.NativeBridge) window.NativeBridge.postMessage("onClose");
+                });
+            } else {
+                warn("sparrowDesk.onClose is not a function");
+            }
+
+            if (window.NativeBridge) window.NativeBridge.postMessage("widgetReady");
+            return;
+        }
+        // Diagnostic timeouts.
+        if (DEBUG && (tries === 30 || tries === 100)) {
+            var candidates = [];
+            for (var k in window) {
+                if (/sparrow|chatbot|widget|sd|survey|launcher/i.test(k)) candidates.push(k);
+            }
+            warn("widgetReady timeout after " + (tries * 100) + "ms. " +
+                 "api=" + !!api + " launcherReady=" + !!window.SD_LAUNCHER_READY +
+                 " globals=" + JSON.stringify(candidates));
         }
     }, 100);
 })();
