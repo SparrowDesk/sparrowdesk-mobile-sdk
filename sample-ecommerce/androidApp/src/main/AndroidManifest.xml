@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="false"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.SparrowDeskEcommerce"
+        android:supportsRtl="true">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ProductDetailActivity"
+            android:label="@string/product_detail"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".CartActivity"
+            android:label="@string/your_cart"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".SupportChatActivity"
+            android:label="@string/support_chat" />
+
+    </application>
+</manifest>

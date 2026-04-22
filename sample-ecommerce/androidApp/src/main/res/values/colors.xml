@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#1B5E20</color>
+    <color name="primary_variant">#134417</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="secondary">#FF6F00</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="background">#FAFAFA</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="on_surface">#212121</color>
+    <color name="on_surface_secondary">#757575</color>
+
+    <!-- Product card background colors -->
+    <color name="product_bg_1">#E3F2FD</color>
+    <color name="product_bg_2">#F3E5F5</color>
+    <color name="product_bg_3">#E8F5E9</color>
+    <color name="product_bg_4">#FFF3E0</color>
+
+    <color name="cart_badge">#D32F2F</color>
+    <color name="divider">#E0E0E0</color>
+</resources>

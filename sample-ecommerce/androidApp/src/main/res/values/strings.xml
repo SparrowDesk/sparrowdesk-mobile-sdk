@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SparrowDesk Store</string>
+    <string name="action_cart">Cart</string>
+    <string name="product_detail">Product Detail</string>
+    <string name="your_cart">Your Cart</string>
+    <string name="support_chat">Support Chat</string>
+    <string name="chat_with_support">Chat with Support</string>
+    <string name="add_to_cart">Add to Cart</string>
+    <string name="added_to_cart">Added to cart!</string>
+    <string name="checkout">Checkout</string>
+    <string name="order_placed">Order placed! Thank you for your purchase.</string>
+    <string name="empty_cart">Your cart is empty</string>
+    <string name="browse_products">Browse Products</string>
+    <string name="need_help">Need help? Chat with our support team</string>
+    <string name="remove">Remove</string>
+    <string name="subtotal">Subtotal</string>
+</resources>
